@@ -1,0 +1,39 @@
+//Excel Okuma
+if ($xlsx = SimpleXLSX::parse('a.xlsx')) 
+{
+    //print_r( $xlsx->rows() );
+    $dim = $xlsx->dimension();
+    $num_cols = $dim[0];
+    $num_rows = $dim[1];
+
+    $i = 0;
+    foreach ($xlsx->rows(0) as $r) {
+        if ($i > 0) {
+            $parametreler = array(
+                'basvuruDenetci' => $r[2],
+                'basvuruDenetimTarihi' => $r[3]
+            );
+
+            $query = $db->update('Basvurular')
+            ->where('basvuruId', $r[1])
+            ->set($parametreler);
+
+            $productParametreler = array(
+                'planTakvimSorumluId' => $r[4],
+                'planTakvimGayriResmiSorumlu' => $r[2],
+                'planTakvimTarih' => $r[5],
+                'planTakvimGayriResmiTarih' => $r[3]
+            );
+
+            $productQuery = $db->update('PlanTakvimler')
+            ->where('planTakvimBasvuruId', $r[1])
+            ->set($productParametreler);
+        }
+        $i++;
+    }
+    echo "başarılı";
+} 
+else 
+{
+    echo SimpleXLSX::parse_error();
+}
