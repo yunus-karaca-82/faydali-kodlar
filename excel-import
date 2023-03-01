@@ -18,16 +18,105 @@ if ($xlsx = SimpleXLSX::parse('a.xlsx'))
             ->where('basvuruId', $r[1])
             ->set($parametreler);
 
-            $productParametreler = array(
-                'planTakvimSorumluId' => $r[4],
-                'planTakvimGayriResmiSorumlu' => $r[2],
-                'planTakvimTarih' => $r[5],
-                'planTakvimGayriResmiTarih' => $r[3]
-            );
+            $list = $db->from('PlanTakvimler')
+            ->where('planTakvimBasvuruId',$r[1])
+            ->first();
 
-            $productQuery = $db->update('PlanTakvimler')
-            ->where('planTakvimBasvuruId', $r[1])
-            ->set($productParametreler);
+            if($list)
+            {
+                $productParametreler = array(
+                    'planTakvimSorumluId' => $r[4],
+                    'planTakvimGayriResmiSorumlu' => $r[2],
+                    'planTakvimTarih' => $r[5],
+                    'planTakvimGayriResmiTarih' => $r[3]
+                );
+    
+                $productQuery = $db->update('PlanTakvimler')
+                ->where('planTakvimBasvuruId', $r[1])
+                ->set($productParametreler);
+            }
+            else
+            {
+                $basvuru = $db->from('Basvurular')
+                ->join('BasvuruBelgeleri', 'BasvuruBelgeleri.basvuruBelgeleriBasvuruId = Basvurular.basvuruId', 'left')
+                ->join('Belgeler', 'Belgeler.belgeId = BasvuruBelgeleri.basvuruBelgeleriBelgeId', 'left')
+                ->where('basvuruId', $r[1])
+                ->first();
+
+                if($basvuru["belgeId"] == 1) //(Modül B)
+                {
+                    $sure = 1;
+                    $durum = 0; //yok
+                }
+                if($basvuru["belgeId"] == 3) //(Modül F)
+                {
+                    $sure = 0.25;
+                    $durum = 0; //yok
+                }
+                if($basvuru["belgeId"] == 4) //(Modül G)
+                {
+                    $sure = 0.5;
+                    $durum = 0; //yok
+                }
+                if($basvuru["belgeId"] == 2) //(Modül E)
+                {
+                    $sure = 1;
+                    $durum = 0; //yok
+                }
+                if($basvuru["belgeId"] == 6) //(Modül H1)
+                {
+                    if($basvuru["basvuruCalisanSayisi"]<25)
+                    {
+                        $sure = 1;
+                    }
+                    else if($basvuru["basvuruCalisanSayisi"]<75)
+                    {
+                        $sure = 1.5;
+                    }
+                    else if($basvuru["basvuruCalisanSayisi"]<125)
+                    {
+                        $sure = 2;
+                    }
+                    else if($basvuru["basvuruCalisanSayisi"]<200)
+                    {
+                        $sure = 2.5;
+                    }
+                    else 
+                    {
+                        $sure = 3;
+                    }
+                    $durum = 1; //var
+                }
+                if($basvuru["belgeId"] == 5) //(Modül D)
+                {
+                    $sure = 1;
+                    $durum = 0; //yok
+                }
+                if($basvuru["belgeId"] == 14) //(Modül TI)
+                {
+                    $sure = 0.25;
+                    $durum = 0; //yok
+                }
+
+                $productParametreler = array(
+                    'planTakvimBasvuruId' => $r[1],
+                    'planTakvimSorumluId' => $r[4],
+                    'planTakvimGayriResmiSorumlu' => $r[2],
+                    'planTakvimTarih' => $r[5],
+                    'planTakvimGayriResmiTarih' => $r[3],
+                    'planTakvimSure' => $sure,
+                    'planTakvimNot' => "",
+                    'planTakvimPlanlayanId' => $kullaniciBilgi['kullaniciID'],
+                    'planTakvimA1RaporNo' => "",
+                    'planTakvimA1RaporTarihi' => "",
+                    'planTakvimAbHtasarim' => $durum,
+                    'planTakvimSorumluOnay'  => 1, //kayıt işlemi yapılırken otomatik olarak denetçi onayı veriliyor
+                    'planTakvimKayitTarih' => date("Y-m-d H:i:s")
+                );
+
+                $query = $db->insert("PlanTakvimler")
+				->set($productParametreler);
+            }
         }
         $i++;
     }
