@@ -126,3 +126,42 @@ else
 {
     echo SimpleXLSX::parse_error();
 }
+
+
+
+
+
+
+
+//Excel Okuma
+if ($xlsx = SimpleXLSX::parse('../../../Upload/a.xlsx')) 
+{
+	//print_r( $xlsx->rows() );
+	$dim = $xlsx->dimension();
+	$num_cols = $dim[0];
+	$num_rows = $dim[1];
+
+	$i = 0;
+	foreach ($xlsx->rows(0) as $r) {
+		if ($i > 0) {
+
+			$parametreler = array(
+				'bayiKod' => $r[0],
+				'bayiAdi' => $r[1],
+				'bayiCa' => $r[2],
+				'bayiSubtypology' => $r[3],
+				'bayiSm' => $r[4],
+				'bayiIl' => $r[5],
+				'bayiIlce' => $r[7],
+				'bayiAdres' => $r[6],
+				'bayiTelefon' => $r[8],
+				'bayiMail' => $r[9]
+			);
+			$query = $db->insert($tableName, $parametreler);
+		}
+		$i++;
+	}
+} 
+else {
+	echo SimpleXLSX::parse_error();
+}
