@@ -18,3 +18,36 @@
     	$('#dob').attr('max', maxDate);
     });
 </script>
+
+
+	function denetimiKaydet() {
+		var e = document.getElementById("planTakvimSorumluId");
+  		var planTakvimSorumluId = e.options[e.selectedIndex].value;
+
+		var m = document.getElementById("planTakvimTarih");
+  		var planTakvimTarih = m.value;
+
+		var data = new FormData();
+		data.append('basvuruId', <?= $basvuruId ?>);
+		data.append('planlamaId', <?= $basvuru["planTakvimId"] ?>);
+		data.append('planTakvimSorumluId', planTakvimSorumluId);
+		data.append('planTakvimTarih', planTakvimTarih);
+
+		alert(data);
+		$.ajax({
+			type: "POST",
+			url: "Pages/DenetimTakvimi/planlamaGuncellemeKod.php",
+			data: data,
+			contentType: false,
+			processData: false,
+			cache: false,
+			async: false,
+			success: function(gelenSayfa) {
+				if (gelenSayfa == 1) {
+					alert("Planlama Tamamlanmıştır.");
+				} else {
+					alert("Bir Hata Oluştu.");
+				}
+			}
+		});
+	}
