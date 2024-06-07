@@ -51,3 +51,53 @@
 			}
 		});
 	}
+
+
+
+
+
+
+
+@model SlugModel
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slug Düzenle</title>
+</head>
+<body>
+    <h2>Slug Düzenle</h2>
+
+    <form id="slugForm" asp-action="Edit" asp-controller="Slug" method="post">
+        <input type="hidden" asp-for="OldSlug" />
+        <label for="newSlug">Yeni Slug:</label>
+        <input type="text" id="newSlug" name="NewSlug" asp-for="NewSlug" />
+
+        <button type="submit">Kaydet</button>
+    </form>
+
+    @if (ViewBag.Message != null)
+    {
+        <div>@ViewBag.Message</div>
+    }
+
+    <script>
+        let oldSlug = '@Model.OldSlug';
+        let form = document.getElementById('slugForm');
+        let newSlugInput = document.getElementById('newSlug');
+
+        form.addEventListener('submit', (event) => {
+            let newSlug = newSlugInput.value;
+            if (oldSlug !== newSlug) {
+                let confirmMessage = "Slug değeri değişti. Değişiklikleri kaydetmek istiyor musunuz?";
+                if (!confirm(confirmMessage)) {
+                    event.preventDefault();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+
